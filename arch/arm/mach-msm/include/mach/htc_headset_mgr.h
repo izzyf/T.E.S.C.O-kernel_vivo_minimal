@@ -126,6 +126,7 @@
 #define HS_DELAY_MIC_BIAS		200
 #define HS_DELAY_MIC_DETECT		1000
 #define HS_DELAY_INSERT			500
+#define HS_DELAY_REMOVE			200
 #define HS_DELAY_REMOVE_LONG		700
 #define HS_DELAY_REMOVE_SHORT		200
 #define HS_DELAY_BUTTON			10
@@ -136,6 +137,7 @@
 #define HS_JIFFIES_MIC_BIAS		msecs_to_jiffies(HS_DELAY_MIC_BIAS)
 #define HS_JIFFIES_MIC_DETECT		msecs_to_jiffies(HS_DELAY_MIC_DETECT)
 #define HS_JIFFIES_INSERT		msecs_to_jiffies(HS_DELAY_INSERT)
+#define HS_JIFFIES_REMOVE		msecs_to_jiffies(HS_DELAY_REMOVE)
 #define HS_JIFFIES_REMOVE_LONG		msecs_to_jiffies(HS_DELAY_REMOVE_LONG)
 #define HS_JIFFIES_REMOVE_SHORT		msecs_to_jiffies(HS_DELAY_REMOVE_SHORT)
 #define HS_JIFFIES_BUTTON		msecs_to_jiffies(HS_DELAY_BUTTON)
