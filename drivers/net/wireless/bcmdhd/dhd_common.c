@@ -95,6 +95,11 @@ extern int dhd_change_mtu(dhd_pub_t *dhd, int new_mtu, int ifidx);
 bool ap_cfg_running = FALSE;
 bool ap_fw_loaded = FALSE;
 
+// packet filter for Rogers nat keep alive +++
+#define DEFAULT_MAX_NUM_FILTERS	8
+extern int filter_reverse;
+extern int pkt_filter_element[DEFAULT_MAX_NUM_FILTERS];
+// packet filter for Rogers nat keep alive ---
 #if defined(KEEP_ALIVE)
 int dhd_keep_alive_onoff(dhd_pub_t *dhd);
 #endif /* KEEP_ALIVE */
@@ -1227,6 +1232,9 @@ int dhd_set_pktfilter(dhd_pub_t * dhd, int add, int id, int offset, char *mask, 
 	char buf[256];
 	int pkt_id = id;
 	wl_pkt_filter_enable_t	enable_parm;
+// packet filter for Rogers nat keep alive +++
+	int i, empty = 0, empty_found = 0;
+// packet filter for Rogers nat keep alive ---
 
 	printf("Enter set packet filter\n");
 
@@ -1262,6 +1270,14 @@ int dhd_set_pktfilter(dhd_pub_t * dhd, int add, int id, int offset, char *mask, 
 //BRCM APSTA END
 
 	if (!add) {
+// packet filter for Rogers nat keep alive +++
+		if (filter_reverse) {
+			for (i = 0; i < DEFAULT_MAX_NUM_FILTERS; i++) {
+				if (pkt_filter_element[i] == pkt_id)
+					pkt_filter_element[i] = 0;
+			}
+		}
+// packet filter for Rogers nat keep alive ---
 		return 0;
 	}
 
@@ -1321,11 +1337,43 @@ int dhd_set_pktfilter(dhd_pub_t * dhd, int add, int id, int offset, char *mask, 
 
 	dhd_wl_ioctl_cmd(dhd, WLC_SET_VAR, buf, buf_len, TRUE, 0);
 
-	enable_parm.id = htod32(pkt_id);
-	enable_parm.enable = htod32(1);
-	bcm_mkiovar("pkt_filter_enable", (char *)&enable_parm,
-		sizeof(wl_pkt_filter_enable_t), buf, sizeof(buf));
-	dhd_wl_ioctl_cmd(dhd, WLC_SET_VAR, buf, sizeof(buf), TRUE , 0);
+// packet filter for Rogers nat keep alive +++
+	/* only enabled if id < 200, and not in suspend mod */
+	if (filter_reverse) {
+		if ((pkt_id < 200)&&(!dhd->in_suspend)) {
+// packet filter for Rogers nat keep alive ---
+			enable_parm.id = htod32(pkt_id);
+			enable_parm.enable = htod32(1);
+			bcm_mkiovar("pkt_filter_enable", (char *)&enable_parm,
+				sizeof(wl_pkt_filter_enable_t), buf, sizeof(buf));
+			dhd_wl_ioctl_cmd(dhd, WLC_SET_VAR, buf, sizeof(buf), TRUE , 0);
+// packet filter for Rogers nat keep alive +++
+		}
+
+		for (i = 0; i < DEFAULT_MAX_NUM_FILTERS; i++) {
+			if (!empty_found && (pkt_filter_element[i] == 0)) {
+				empty_found = 1;
+				empty = i;
+			}
+			if (pkt_filter_element[i] == pkt_id) /* item already exist, skip it */
+				break;
+		}
+
+		if (i == DEFAULT_MAX_NUM_FILTERS) {
+			/* add this item to list */
+			if (empty_found)
+				pkt_filter_element[empty] = pkt_id;
+			else
+				printk("no enough room for filter %d!!\n", pkt_id);
+		}
+	} else {
+		enable_parm.id = htod32(pkt_id);
+		enable_parm.enable = htod32(1);
+		bcm_mkiovar("pkt_filter_enable", (char *)&enable_parm,
+			sizeof(wl_pkt_filter_enable_t), buf, sizeof(buf));
+		dhd_wl_ioctl_cmd(dhd, WLC_SET_VAR, buf, sizeof(buf), TRUE , 0);
+	}
+// packet filter for Rogers nat keep alive ---
 
 	return 0;
 }

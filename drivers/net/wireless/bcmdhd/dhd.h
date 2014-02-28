@@ -654,6 +654,9 @@ enum pkt_filter_id {
 	ALLOW_DHCP,
 	ALLOW_IPV4_MULTICAST,
 	ALLOW_IPV6_MULTICAST,
+// packet filter for Rogers nat keep alive +++
+	DENY_NAT_KEEP_ALIVE = 201
+// packet filter for Rogers nat keep alive ---
 };
 int dhd_set_pktfilter(dhd_pub_t * dhd, int add, int id, int offset, char *mask, char *pattern);
 
@@ -832,6 +835,9 @@ extern bool wifi_fail_retry;
 /* HTC_CSP_START */
 /* The maximum consequent events of "out of bus->txq" */
 #define MAX_TXQ_FULL_EVENT 300
+// packet filter for Rogers nat keep alive +++
+extern void dhd_suspend_pktfilter(dhd_pub_t * dhd, int suspend);
+// packet filter for Rogers nat keep alive ---
 extern int block_ap_event;
 extern int dhdcdc_power_active_while_plugin;
 extern char wl_abdroid_gatewaybuf[8+1]; /*HTC_KlocWork*/

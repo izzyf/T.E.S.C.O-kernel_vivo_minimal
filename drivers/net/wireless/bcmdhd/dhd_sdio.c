@@ -549,6 +549,10 @@ dhdsdio_htclk(dhd_bus_t *bus, bool on, bool pendok)
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
+	if (!bus) {
+		DHD_ERROR(("%s: bus is null\n", __FUNCTION__));
+		goto error;
+	}
 #if defined(OOB_INTR_ONLY)
 	pendok = FALSE;
 #endif
@@ -569,9 +573,18 @@ dhdsdio_htclk(dhd_bus_t *bus, bool on, bool pendok)
 			goto error;
 		}
 
+		if (!(bus->sih)) {
+			DHD_ERROR(("%s: bus->sih is null\n", __FUNCTION__));
+			goto error;
+		}
+
 		if (pendok &&
 		    ((bus->sih->buscoretype == PCMCIA_CORE_ID) && (bus->sih->buscorerev == 9))) {
 			uint32 dummy, retries;
+			if (!(bus->regs)) {
+				DHD_ERROR(("%s: bus->regs is null\n", __FUNCTION__));
+				goto error;
+			}
 			R_SDREG(dummy, &bus->regs->clockctlstatus, retries);
 		}
 

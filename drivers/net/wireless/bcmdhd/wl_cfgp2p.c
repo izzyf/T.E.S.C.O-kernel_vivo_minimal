@@ -1865,8 +1865,10 @@ wl_cfgp2p_register_ndev(struct wl_priv *wl)
 		return -ENOMEM;
 	}
 
-	wdev->wiphy = wl->wdev->wiphy;
-
+	//HTC_CSP_START
+	if(wdev != NULL)
+	//HTC_CSP_END
+		wdev->wiphy = wl->wdev->wiphy;	
 	wdev->iftype = wl_mode_to_nl80211_iftype(WL_MODE_BSS);
 
 	net->ieee80211_ptr = wdev;
@@ -1897,15 +1899,15 @@ wl_cfgp2p_register_ndev(struct wl_priv *wl)
 
 	return ret;
 fail:
-
-	net->netdev_ops = NULL;
-
-
-	if (net) {
-		unregister_netdev(net);
-		free_netdev(net);
-	}
-
+	/* HTC_CSP_START*/
+    if(net != NULL){
+	  net->netdev_ops = NULL;
+    }
+	/* HTC_CSP_END*/
+		if (net) {
+		  unregister_netdev(net);
+		  free_netdev(net);
+	  }
 	return -ENODEV;
 }
 

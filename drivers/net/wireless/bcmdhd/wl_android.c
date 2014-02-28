@@ -192,7 +192,7 @@ int wl_cfg80211_deauth_sta(struct net_device *net, char* buf, int len)
 #endif
 extern int dhd_os_check_if_up(void *dhdp);
 extern void *bcmsdh_get_drvdata(void);
-
+extern bool check_hang_already(struct net_device *dev); //[Broadcom]
 extern bool ap_fw_loaded;
 #ifdef CUSTOMER_HW2
 extern char iface_name[IFNAMSIZ];
@@ -1732,7 +1732,12 @@ int wl_android_wifi_off(struct net_device *dev)
 	if (dhd_APUP) {
 		printf("apmode off - AP_DOWN\n");
 		dhd_APUP = false;
-		wl_iw_send_priv_event(dev, "AP_DOWN");
+		if (check_hang_already(dev)) {
+			printf("Don't send AP_DOWN due to alreayd hang\n");
+		}
+		else {
+			wl_iw_send_priv_event(dev, "AP_DOWN");
+		}
 	}
 	/* HTC_WIFI_END */
 	if (g_wifi_on) {
